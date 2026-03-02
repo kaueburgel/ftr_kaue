@@ -1,0 +1,179 @@
+{
+  "name": "Atividade Kaue N8N",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "538b90b1-e829-49f4-8ea2-ec2d2ba54e5c",
+              "name": "resposta",
+              "value": "=A Previsão do Clima em {{$json.name}} é de {{$json.main.temp.format('pt-BR')}}Cº, mínima {{ $json.main.temp_min.format('pt-BR')}}Cº e máxima {{ $json.main.temp_max.format('pt-BR') }}Cº. Tenha um ótimo dia! ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        0
+      ],
+      "id": "d55646dd-2d01-4b8c-9003-0101404eddd0",
+      "name": "Concatenar Texto"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "737f3d0e-8949-47fd-a99a-bb7e635a25af",
+      "name": "Receber Mensagem",
+      "webhookId": "dfa2512e-e88b-4f35-9576-dac24082ebac",
+      "credentials": {
+        "telegramApi": {
+          "id": "sLbHwmK1LnuloTru",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "cityName": "={{ $json.data.text }}",
+        "language": "ptbr"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        512,
+        0
+      ],
+      "id": "0d5f275c-f673-457a-b729-34b10ff674ef",
+      "name": "API WeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "cMJpeQXZdLUQZw8i",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Receber Mensagem').item.json.message.chat.id }}",
+        "text": "={{ $json.resposta }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "df2afd17-c2ac-4471-b4d1-aa1d965dfb16",
+      "name": "Enviar Resposta",
+      "webhookId": "39983560-d031-4d04-a41d-acbee5dbe59e",
+      "credentials": {
+        "telegramApi": {
+          "id": "sLbHwmK1LnuloTru",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $json.message.chat.id }}",
+        "message": "Olá, qual cidade gostaria de saber a previsão do tempo?",
+        "responseType": "freeText",
+        "options": {
+          "responseFormTitle": "Aaaa"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "d8808bc6-d297-400f-96c9-efd3cb771fec",
+      "name": "Send message and wait for response",
+      "webhookId": "05b58dbb-63be-4fae-9444-5de17b063c31",
+      "credentials": {
+        "telegramApi": {
+          "id": "sLbHwmK1LnuloTru",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Concatenar Texto": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receber Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API WeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Concatenar Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "API WeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "70079fc2-0eca-4806-84d3-d2bb669a3c9c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f1ce223f8d6fe74a95b402e696a143445b8bbe455c35467f04244ff096225508"
+  },
+  "id": "LL0unDmPcRBk4nqX",
+  "tags": []
+}
