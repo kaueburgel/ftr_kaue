@@ -1,17 +1,148 @@
-🌦️ Automação n8n: Consulta de Clima via Telegram
-Este projeto é uma automação desenvolvida no n8n que permite consultar a previsão do tempo de qualquer cidade do mundo através de um bot no Telegram. O workflow integra as APIs do Telegram e do OpenWeatherMap.
+# 🌦️ Bot de Clima no Telegram com n8n
 
-🚀 Como Funciona
+Automação para consulta de clima em tempo real via Telegram, utilizando n8n e a API da OpenWeather.
 
-Gatilho de Entrada: A automação inicia ao receber qualquer mensagem no Telegram.
-Pergunta Interativa: O bot responde perguntando: "Olá, qual cidade gostaria de saber a previsão do tempo?" e aguarda a resposta do usuário (função sendAndWait).
-Consulta Meteorológica: O nome da cidade enviado é processado pela API do OpenWeatherMap em português (ptbr).
+---
 
-Fluxo de Resposta:
-✅ Sucesso: Se a cidade for encontrada, o bot retorna uma mensagem formatada com a temperatura atual, mínima e máxima (formatadas para o padrão brasileiro).
-❌ Falha: Caso a cidade não exista ou a API retorne erro, o bot informa: "A cidade [nome] não existe" e encerra a execução.
+## 🚀 Funcionalidades
 
-🛠️ Configuração Necessária
-Para rodar este workflow, você precisará configurar as seguintes credenciais:
-Telegram Bot API: Crie um bot via @BotFather para obter seu Token.
-OpenWeatherMap API Key: Gere sua chave gratuita no portal oficial do OpenWeatherMap.
+* Recebe mensagens via Telegram
+* Normaliza entrada (acentos, espaços, case)
+* Consulta clima em tempo real
+* Valida resposta da API
+* Trata erros de forma resiliente
+* Retorna mensagem formatada ao usuário
+
+---
+
+## 🧠 Arquitetura
+
+```
+Telegram Trigger
+   ↓
+Normalização
+   ↓
+HTTP Request (OpenWeather)
+   ↓
+Validação (cod == 200)
+   ↓
+Validação (temperatura)
+   ↓
+Resposta ou Erro
+```
+
+---
+
+## 🔧 Principais Etapas
+
+### 🔤 Normalização da Entrada
+
+```javascript
+($json.message.text || "")
+  .trim()
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, " ")
+```
+
+---
+
+### 🌐 Requisição OpenWeather
+
+**Endpoint**
+
+```
+https://api.openweathermap.org/data/2.5/weather
+```
+
+**Parâmetros**
+
+* `q`: {{$json.queue}}
+* `units`: metric
+* `lang`: pt_br
+* `appid`: {{$env.OPENWEATHER_API_KEY}}
+
+---
+
+### ✅ Validação de Sucesso
+
+```javascript
+Number($json.cod) === 200
+```
+
+---
+
+### 🌡️ Validação de Dados
+
+* `main.temp`
+* `main.temp_min`
+* `main.temp_max`
+
+---
+
+### 💬 Mensagem de Resposta
+
+```javascript
+A previsão em *{{ $json.name }}*: 
+*{{ Math.round($json.main.temp) }}°C* 
+(mín *{{ Math.round($json.main.temp_min) }}°C*, máx *{{ Math.round($json.main.temp_max) }}°C*). 
+*{{ $json.weather[0].description }}*.
+```
+
+---
+
+## ❌ Tratamento de Erros
+
+* Cidade não encontrada (API)
+* Dados incompletos (temperatura)
+
+---
+
+## 🔐 Variáveis de Ambiente
+
+```
+OPENWEATHER_API_KEY=your_api_key_here
+```
+
+---
+
+## 📦 Como usar
+
+1. Importar o workflow no n8n
+2. Configurar credenciais do Telegram
+3. Definir a variável de ambiente
+4. Ativar o fluxo
+5. Enviar uma cidade no Telegram
+
+---
+
+## 🧪 Exemplo
+
+**Entrada**
+
+```
+São Paulo
+```
+
+**Saída**
+
+```
+A previsão em São Paulo: 21°C (mín 20°C, máx 22°C). algumas nuvens.
+```
+
+---
+
+## 🏗️ Boas Práticas
+
+* Separação de responsabilidades
+* Normalização de entrada
+* Validação defensiva
+* Uso de variáveis de ambiente
+* Tratamento de erro estruturado
+
+---
+
+## 👨‍💻 Autor
+
+Projeto de automação com foco em integração de APIs e workflows no n8n.
