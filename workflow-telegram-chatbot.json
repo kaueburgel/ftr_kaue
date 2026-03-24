@@ -19,7 +19,7 @@
       "webhookId": "dc6e968a-da16-473d-a1da-607ebc01565f",
       "credentials": {
         "telegramApi": {
-          "id": "0WAufkg6kz5GkQea",
+          "id": "API KEY TELEGRAM",
           "name": "Telegram account"
         }
       }
@@ -36,7 +36,7 @@
             },
             {
               "name": "appid",
-              "value": "e901ed17aadbaa8854e9a04fe4abeea8"
+              "value": "APIKEY WEATHER"
             },
             {
               "name": "units",
@@ -100,7 +100,7 @@
       "webhookId": "fecb3e7b-88ce-450b-a2f5-8f0e3a35adb5",
       "credentials": {
         "telegramApi": {
-          "id": "0WAufkg6kz5GkQea",
+          "id": "API KEY TELEGRAM",
           "name": "Telegram account"
         }
       }
@@ -233,7 +233,7 @@
       "webhookId": "fcb8866d-7a11-4629-baf9-b18a283b26b4",
       "credentials": {
         "telegramApi": {
-          "id": "0WAufkg6kz5GkQea",
+          "id": "API KEY TELEGRAM",
           "name": "Telegram account"
         }
       }
@@ -255,7 +255,7 @@
       "webhookId": "fcb8866d-7a11-4629-baf9-b18a283b26b4",
       "credentials": {
         "telegramApi": {
-          "id": "0WAufkg6kz5GkQea",
+          "id": "API KEY TELEGRAM",
           "name": "Telegram account"
         }
       }
