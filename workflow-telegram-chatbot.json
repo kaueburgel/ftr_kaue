@@ -1,5 +1,5 @@
 {
-  "name": "Atividade Kaue N8N",
+  "name": "Bot Clima Telegram n8n - Kaue,
   "nodes": [
     {
       "parameters": {
@@ -8,68 +8,99 @@
         ],
         "additionalFields": {}
       },
+      "id": "39cdad82-1699-40ff-9653-2d4e5167c154",
+      "name": "Receber Mensagem",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        0
+        -1440,
+        240
       ],
-      "id": "737f3d0e-8949-47fd-a99a-bb7e635a25af",
-      "name": "Receber Mensagem",
-      "webhookId": "dfa2512e-e88b-4f35-9576-dac24082ebac",
+      "webhookId": "dc6e968a-da16-473d-a1da-607ebc01565f",
       "credentials": {
         "telegramApi": {
-          "id": "INFORME API KEY TELEGRAM",
+          "id": "0WAufkg6kz5GkQea",
           "name": "Telegram account"
         }
       }
     },
     {
       "parameters": {
-        "cityName": "={{ $json.data.text }}",
-        "language": "ptbr"
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }}"
+            },
+            {
+              "name": "appid",
+              "value": "e901ed17aadbaa8854e9a04fe4abeea8"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {}
+          ]
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.openWeatherMap",
-      "typeVersion": 1,
+      "id": "260b55c5-0b3f-4f24-81d9-6589e8cd384d",
+      "name": "HTTP OpenWeatherMap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        464,
-        0
+        -928,
+        240
       ],
-      "id": "0d5f275c-f673-457a-b729-34b10ff674ef",
-      "name": "API WeatherMap",
-      "retryOnFail": false,
-      "notesInFlow": false,
-      "executeOnce": false,
-      "credentials": {
-        "openWeatherMapApi": {
-          "id": "INFORME API KEY OPENWEATHERMAP",
-          "name": "OpenWeatherMap account"
-        }
-      },
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "operation": "sendAndWait",
-        "chatId": "={{ $json.message.chat.id }}",
-        "message": "Olá, qual cidade gostaria de saber a previsão do tempo?",
-        "responseType": "freeText",
-        "options": {
-          "responseFormTitle": "Aaaa"
-        }
+        "assignments": {
+          "assignments": [
+            {
+              "name": "resposta",
+              "value": "=A previsão em *{{ $json.name }}*: *{{ Math.round($json.main.temp) }}°C* (mín *{{ Math.round($json.main.temp_min) }}°C*, máx *{{ Math.round($json.main.temp_max) }}°C*). *{{ $json.weather[0].description }}*. Ótimo dia! ☀️",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       },
+      "id": "212bae1f-37ec-40f9-9f30-2b3847303b12",
+      "name": "Preparar Mensagem",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Receber Mensagem').first().json.message.chat.id }}",
+        "text": "={{ $json.resposta }}",
+        "additionalFields": {}
+      },
+      "id": "40f82a75-a2e1-491b-9fa9-fc79dd51262f",
+      "name": "Mensagem Sucesso",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        224,
-        0
+        240,
+        16
       ],
-      "id": "d8808bc6-d297-400f-96c9-efd3cb771fec",
-      "name": "Perguntar a Cidade",
-      "webhookId": "05b58dbb-63be-4fae-9444-5de17b063c31",
+      "webhookId": "fecb3e7b-88ce-450b-a2f5-8f0e3a35adb5",
       "credentials": {
         "telegramApi": {
-          "id": "INFORME API KEY TELEGRAM",
+          "id": "0WAufkg6kz5GkQea",
           "name": "Telegram account"
         }
       }
@@ -79,64 +110,152 @@
         "assignments": {
           "assignments": [
             {
-              "id": "538b90b1-e829-49f4-8ea2-ec2d2ba54e5c",
-              "name": "resposta",
-              "value": "=A Previsão do Clima em *{{$json.name}}* é de *{{$json.main.temp.format('pt-BR')}}Cº*, mínima *{{ $json.main.temp_min.format('pt-BR')}}Cº* e máxima *{{ $json.main.temp_max.format('pt-BR') }}Cº*. Tenha um ótimo dia! ",
+              "id": "9974e51c-432e-4a79-8d5a-8f8d4f23e728",
+              "name": "queue",
+              "value": "={{ \n  ($json.message.text || \"\")\n    .trim()\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .replace(/\\s+/g, \" \")\n}}",
               "type": "string"
             }
           ]
         },
+        "includeOtherFields": "={{ false }}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        752,
-        -16
+        -1200,
+        240
       ],
-      "id": "d55646dd-2d01-4b8c-9003-0101404eddd0",
-      "name": "Escrever Saída"
+      "id": "aca03594-7e6b-4d2d-b553-c56bcb03e3a4",
+      "name": "Normaliza Entrada"
     },
     {
       "parameters": {
-        "chatId": "={{ $('Receber Mensagem').item.json.message.chat.id }}",
-        "text": "=A cidade *{{ $('Perguntar a Cidade').item.json.data.text }}* não existe.",
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "0db6a0e1-bff4-440f-9d4e-d4b7d5ee0970",
+              "leftValue": "={{ $json.cod }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a9c13681-8340-437b-8b42-12d857f197a4",
+      "name": "Sucesso?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -624,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "96942dff-d57b-46e9-b129-2dcd4850127e",
+              "leftValue": "={{ $json.main.temp }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9e00ad3b-aee0-4b85-965b-41444a0b2f03",
+              "leftValue": "={{ $json.main.temp_min }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1890682f-e44e-46bc-abde-e283888caf6f",
+              "leftValue": "={{ $json.main.temp_max }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -336,
+        112
+      ],
+      "id": "21fa2042-dfd7-4ea6-9491-0dc6977bbf82",
+      "name": "Possui Temperatura?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Receber Mensagem').first().json.message.chat.id }}",
+        "text": "=Não foi possível consultar a temperatura da cidade *{{ $('Sanitizar Cidade').item.json.sanitized_city }}*. Tente Novamente.",
         "additionalFields": {}
       },
+      "id": "91c508d6-9dab-4add-a892-94ec4b5f8801",
+      "name": "Erro Temperatura",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        752,
-        224
+        -32,
+        192
       ],
-      "id": "ba589b29-289b-43af-a588-1c84c1d56127",
-      "name": "Mensagem Falha",
-      "webhookId": "39983560-d031-4d04-a41d-acbee5dbe59e",
+      "webhookId": "fcb8866d-7a11-4629-baf9-b18a283b26b4",
       "credentials": {
         "telegramApi": {
-          "id": "INFORME API KEY TELEGRAM",
+          "id": "0WAufkg6kz5GkQea",
           "name": "Telegram account"
         }
       }
     },
     {
       "parameters": {
-        "chatId": "={{ $('Receber Mensagem').item.json.message.chat.id }}",
-        "text": "={{ $json.resposta }}",
+        "chatId": "={{ $('Receber Mensagem').first().json.message.chat.id }}",
+        "text": "=Não foi possível consultar a cidade *{{ $('Sanitizar Cidade').item.json.sanitized_city }}*. Tente novamente.",
         "additionalFields": {}
       },
+      "id": "ab1c09e7-06e2-47bc-b49c-fef8105a454d",
+      "name": "Erro API",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        992,
-        -16
+        -320,
+        368
       ],
-      "id": "df2afd17-c2ac-4471-b4d1-aa1d965dfb16",
-      "name": "Mensagem Sucesso",
-      "webhookId": "39983560-d031-4d04-a41d-acbee5dbe59e",
+      "webhookId": "fcb8866d-7a11-4629-baf9-b18a283b26b4",
       "credentials": {
         "telegramApi": {
-          "id": "INFORME API KEY TELEGRAM",
+          "id": "0WAufkg6kz5GkQea",
           "name": "Telegram account"
         }
       }
@@ -148,47 +267,76 @@
       "main": [
         [
           {
-            "node": "Perguntar a Cidade",
+            "node": "Normaliza Entrada",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "API WeatherMap": {
+    "HTTP OpenWeatherMap": {
       "main": [
         [
           {
-            "node": "Escrever Saída",
+            "node": "Sucesso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Mensagem Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliza Entrada": {
+      "main": [
+        [
+          {
+            "node": "HTTP OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sucesso?": {
+      "main": [
+        [
+          {
+            "node": "Possui Temperatura?",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Mensagem Falha",
+            "node": "Erro API",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Perguntar a Cidade": {
+    "Possui Temperatura?": {
       "main": [
         [
           {
-            "node": "API WeatherMap",
+            "node": "Preparar Mensagem",
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "Escrever Saída": {
-      "main": [
+        ],
         [
           {
-            "node": "Mensagem Sucesso",
+            "node": "Erro Temperatura",
             "type": "main",
             "index": 0
           }
@@ -199,14 +347,13 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": false
+    "binaryMode": "separate"
   },
-  "versionId": "d265ad39-aa4b-4c2e-9821-15b52cbfaf90",
+  "versionId": "b78325f9-909d-4f1a-868a-e655b7c6ad67",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "f1ce223f8d6fe74a95b402e696a143445b8bbe455c35467f04244ff096225508"
+    "instanceId": "f4646687e90fbc1c83b34bf10b44e4798f37c91a666d3296e05186ed1ad7f5ec"
   },
-  "id": "LL0unDmPcRBk4nqX",
+  "id": "wVA7VILWPenESRex",
   "tags": []
 }
